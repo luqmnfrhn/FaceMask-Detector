@@ -3,11 +3,11 @@ from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 import cv2
 import numpy as np
-from tensorflow.keras.models import load_model
-from tensorflow.keras.utils import load_img, img_to_array
+from keras.models import load_model
+from keras.utils import load_img, img_to_array
 
 # Load the saved model
-model = load_model('FaceMask-Detector/face_mask_detector_mobilenetv2.h5')
+model = load_model('new_face_mask_detector_2.h5')
 
 # Load Haar Cascade for face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -33,18 +33,22 @@ def process_image(file_path):
 
             # Predict mask status
             prediction = model.predict(face_array)[0][0]
-            label = "NO MASK" if prediction > 0.5 else "MASK"
-            color = (0, 0, 255) if prediction > 0.5 else (0, 255, 0)
-
-            # Count masks and no masks
-            if prediction > 0.5:
+            if prediction > 0.5:  # Adjusted threshold for "NO MASK"
+                label = "NO MASK"
+                color = (0, 0, 255)
                 no_mask_count += 1
             else:
+                label = "MASK"
+                color = (0, 255, 0)
                 mask_count += 1
 
-            # Draw rectangle and label on the image
+            # Add prediction confidence to the label
+            confidence = f"{prediction:.2f}"
+            label_with_confidence = f"{label} ({confidence})"
+
+            # Draw rectangle and label with confidence on the image
             cv2.rectangle(original_image, (x, y), (x + w, y + h), color, 3)
-            cv2.putText(original_image, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+            cv2.putText(original_image, label_with_confidence, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
 
         # Convert image to RGB and display it in the GUI
         original_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)

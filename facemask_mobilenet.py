@@ -6,6 +6,7 @@ from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
 import matplotlib.pyplot as plt
 
+
 # Load MobileNetV2 as the base model
 base_model = MobileNetV2(weights='imagenet', include_top=False, input_shape=(150, 150, 3))
 
@@ -31,24 +32,38 @@ train_datagen = ImageDataGenerator(
     rescale=1.0 / 255,
     shear_range=0.2,
     zoom_range=0.2,
-    horizontal_flip=True
+    horizontal_flip=True,
+    rotation_range=30,
+    brightness_range=[0.8, 1.2],
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    validation_split=0.2
 )
+
 
 test_datagen = ImageDataGenerator(rescale=1.0 / 255)
 
 training_set = train_datagen.flow_from_directory(
-    'train',  # Replace with your train dataset path
+    'FaceMask-Detector/train',  # Replace with your train dataset path
     target_size=(150, 150),
-    batch_size=16,
-    class_mode='binary'
+    batch_size=32,
+    class_mode='binary',
+    subset='training'
 )
 
 test_set = test_datagen.flow_from_directory(
-    'test',  # Replace with your test dataset path
+    'FaceMask-Detector/test',  # Replace with your test dataset path
     target_size=(150, 150),
-    batch_size=16,
-    class_mode='binary'
+    batch_size=32,
+    class_mode='binary',
 )
+
+# Compile model with L2 regularization
+# from tensorflow.
+
+# x = Dense(128, activation='relu', kernel_regularizer=l2(0.01)(base_model.output))
+# x = Dropout(0.5)(x)
+# predictions = Dense(1, activation='sigmoid')(x)
 
 # Train the model
 early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
@@ -56,7 +71,7 @@ early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weig
 history = model.fit(
     training_set,
     validation_data=test_set,
-    epochs=20,
+    epochs=10,
     callbacks=[early_stopping]
 )
 
@@ -76,7 +91,7 @@ history_fine_tune = model.fit(
 )
 
 # Save the trained model
-model.save('face_mask_detector_mobilenetv2.h5')
+model.save('new_face_mask_detector_2.h5')
 
 # Evaluate the model
 loss, accuracy = model.evaluate(test_set)

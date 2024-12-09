@@ -70,14 +70,14 @@ train_datagen = ImageDataGenerator(
 test_datagen = ImageDataGenerator(rescale=1.0 / 255)
 
 training_set = train_datagen.flow_from_directory(
-    'train',
+    'FaceMask-Detector/train',
     target_size=(150, 150),
     batch_size=16,
     class_mode='binary'
 )
 
 test_set = test_datagen.flow_from_directory(
-    'test',
+    'FaceMask-Detector/test',
     target_size=(150, 150),
     batch_size=16,
     class_mode='binary'
@@ -86,11 +86,11 @@ test_set = test_datagen.flow_from_directory(
 # Train the model
 model.fit(
     training_set,
-    epochs=20,
+    epochs=10,
     validation_data=test_set
 )
 
-history = model.fit(training_set, validation_data=test_set, epochs = 20)
+history = model.fit(training_set, validation_data=test_set, epochs = 10)
 
 plt.plot(history.history['accuracy'], label='Train Accuracy')
 plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
@@ -98,10 +98,10 @@ plt.legend()
 plt.show()
 
 # Save the model
-model.save('mymodel.h5')
+model.save('updatemodel.h5')
 
 # Load the model
-mymodel = load_model('mymodel.h5')
+mymodel = load_model('updatemodel.h5')
 
 # Live Detection
 cap = cv2.VideoCapture(0)
